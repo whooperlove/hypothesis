@@ -5,11 +5,6 @@
 
 ---
 
-## 🔗 Live Link
-📌 **[Enter Hypothesis Archives](https://whooperlove.github.io/hypothesis/)**
-
----
-
 ## 📂 Researcher
 * **Dexter Jeong**
 * *© 2026 Dexter Jeong. All rights reserved.*
