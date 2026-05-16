@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Substrate-Independent Pattern Persistence Hypothesis (v2)</title>
+    <style>
+        :root {
+            --bg-color: #0a0b10;
+            --text-color: #e2e8f0;
+            --accent-em: #00f2fe;
+            --accent-qc: #9b51e0;
+            --accent-holo: #ffb703;
+            --accent-pattern: #00ff87;
+            --accent-rigor: #ff4d8d;
+            --card-bg: #161923;
+            --muted: #8a93a6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1f1c2c, #4b3f72);
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        header .version-tag {
+            display: inline-block;
+            background: rgba(255,77,141,0.15);
+            border: 1px solid var(--accent-rigor);
+            color: var(--accent-rigor);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.1rem;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        header p.subtitle {
+            margin: 10px 0 0 0;
+            font-size: 1rem;
+            color: #ccc;
+        }
+
+        header p.lineage {
+            margin: 18px auto 0 auto;
+            max-width: 700px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .intro-quote {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--accent-pattern);
+            padding: 22px;
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .intro-quote strong {
+            color: var(--accent-pattern);
+        }
+
+        .meta-block {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+            font-size: 0.8rem;
+        }
+
+        .meta-block span {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: var(--muted);
+        }
+
+        .meta-block span b {
+            color: var(--text-color);
+        }
+
+        h2.section {
+            font-size: 1.4rem;
+            margin-top: 50px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,242,254,0.08);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card .pillar-num {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .card.full {
+            grid-column: 1 / -1;
+        }
+
+        .card .equation {
+            background: #020205;
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 14px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--accent-em);
+            overflow-x: auto;
+        }
+
+        .card .note {
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-top: 10px;
+            border-top: 1px dashed rgba(255,255,255,0.06);
+            padding-top: 8px;
+        }
+
+        /* Calculator (replaces v1 simulator) */
+        .calc-box {
+            background-color: #020205;
+            border: 2px solid #222;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .calc-box h3 {
+            margin-top: 0;
+            color: var(--accent-em);
+        }
+
+        .calc-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            margin: 18px 0;
+        }
+
+        .calc-row label {
+            min-width: 180px;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+
+        .calc-row input[type="range"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .calc-row .value {
+            min-width: 120px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: var(--accent-em);
+        }
+
+        .calc-output {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0,255,135,0.05);
+            border-left: 3px solid var(--accent-pattern);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .calc-output .big-number {
+            font-size: 1.8rem;
+            color: var(--accent-pattern);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .calc-output .small-note {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        /* Predictions list */
+        .pred-list {
+            counter-reset: pred;
+            list-style: none;
+            padding: 0;
+        }
+
+        .pred-list li {
+            counter-increment: pred;
+            background: var(--card-bg);
+            border-left: 3px solid var(--accent-rigor);
+            padding: 18px 22px;
+            margin-bottom: 14px;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+        }
+
+        .pred-list li::before {
+            content: "P" counter(pred);
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            color: var(--accent-rigor);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .pred-list li .pred-title {
+            font-weight: bold;
+            color: var(--accent-rigor);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .pred-list li .pred-test {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 8px;
+            display: block;
+        }
+
+        /* References */
+        .refs {
+            font-size: 0.85rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .refs ol {
+            padding-left: 22px;
+        }
+
+        .refs ol li {
+            margin-bottom: 8px;
+        }
+
+        .refs code {
+            color: var(--accent-em);
+            background: rgba(0,242,254,0.05);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        /* Caveats */
+        .caveat-box {
+            background: rgba(255,77,141,0.05);
+            border: 1px solid rgba(255,77,141,0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            font-size: 0.92rem;
+        }
+
+        .caveat-box h4 {
+            margin-top: 0;
+            color: var(--accent-rigor);
+            font-size: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #222;
+        }
+
+        .author-info {
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #888;
+            border-top: 1px dashed #333;
+            padding-top: 15px;
+            display: inline-block;
+        }
+        .author-info span {
+            margin: 0 10px;
+        }
+        .author-info a {
+            color: var(--accent-em);
+            text-decoration: none;
+        }
+        .author-info a:hover {
+            text-decoration: underline;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 15px 22px;
+            margin-bottom: 40px;
+            font-size: 0.9rem;
+        }
+
+        .toc strong {
+            color: var(--accent-em);
+        }
+
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-right: 14px;
+            opacity: 0.85;
+        }
+
+        .toc a:hover {
+            color: var(--accent-em);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="version-tag">VERSION 2 — RIGOROUS REVISION</span>
+        <h1>Substrate-Independent Pattern Persistence Hypothesis</h1>
+        <p class="subtitle">A falsifiable reformulation of the Multidimensional Accumulation Hypothesis</p>
+        <p class="lineage">Successor to v1 (May 2026). The mystical framing of v1 is replaced with information-theoretic, bioelectromagnetic, and holographic primitives, each tied to measurable predictions or formal bounds.</p>
+    </header>
+
+    <div class="container">
+
+        <div class="toc">
+            <strong>Outline:</strong>
+            <a href="#thesis">Thesis</a>
+            <a href="#calc">Information Calculator</a>
+            <a href="#pillars">Five Pillars</a>
+            <a href="#predictions">Falsifiable Predictions</a>
+            <a href="#caveats">Caveats</a>
+            <a href="#refs">References</a>
+        </div>
+
+        <div class="meta-block">
+            <span><b>Domain:</b> Philosophy of physics / consciousness studies</span>
+            <span><b>Falsifiability:</b> Partial (P1–P4 testable)</span>
+            <span><b>Status:</b> Speculative hypothesis, not empirically supported</span>
+            <span><b>Math level:</b> Order-of-magnitude</span>
+        </div>
+
+        <h2 class="section" id="thesis">Thesis</h2>
+
+        <div class="intro-quote">
+            <p>Conscious activity is a <strong>physical pattern</strong> instantiated in a biological brain. Every act of computation has thermodynamic, electromagnetic, and (possibly) quantum-coherent byproducts that leave traces in the environment. These traces are bounded in information content by Bekenstein-type entropy limits, propagate at finite speed, and do not disappear at biological death — they continue to exist as distributed informational structure in the surrounding physical universe.</p>
+            <p style="margin-top:14px;">We do not claim this distributed residue constitutes a <em>continuing experiencing subject</em>. We claim only that the <strong>informational pattern</strong> sufficient to specify a mind has non-trivial physical persistence after the brain ceases to instantiate it, and we attempt to quantify and test this claim.</p>
+        </div>
+
+        <h2 class="section" id="calc">Order-of-Magnitude Calculator</h2>
+
+        <div class="calc-box">
+            <h3>Bioelectromagnetic Information Outflow</h3>
+            <p style="font-size:0.92rem; color:var(--muted);">Estimate the upper-bound information radiated by a conscious brain over a lifetime, treating it as an electromagnetic source bounded by the Bekenstein limit.</p>
+
+            <div class="calc-row">
+                <label>Lifespan (years):</label>
+                <input type="range" id="lifespan" min="1" max="120" value="70" oninput="recalc()">
+                <span class="value" id="lifespan-val">70 yr</span>
+            </div>
+
+            <div class="calc-row">
+                <label>Brain radius (cm):</label>
+                <input type="range" id="radius" min="5" max="15" value="8" oninput="recalc()">
+                <span class="value" id="radius-val">8 cm</span>
+            </div>
+
+            <div class="calc-row">
+                <label>Brain power (W):</label>
+                <input type="range" id="power" min="5" max="40" value="20" oninput="recalc()">
+                <span class="value" id="power-val">20 W</span>
+            </div>
+
+            <div class="calc-output">
+                <div>Bekenstein information bound for the brain volume:</div>
+                <div class="big-number" id="bekenstein">— bits</div>
+                <div class="small-note">Upper bound on information content of any system of given radius and total energy: <code>S ≤ 2πRE / (ℏc ln 2)</code></div>
+
+                <div style="margin-top:18px;">Total radiated EM energy over lifetime (~20W brain, ~0.5% radiated):</div>
+                <div class="big-number" id="radiated">— J</div>
+                <div class="small-note">Most metabolic energy becomes infrared heat; an upper-bound fraction couples to far-field EM. Even the heat radiation carries information about its source.</div>
+
+                <div style="margin-top:18px;">Radius of the resulting <em>information lightcone</em> at present (started at age 30):</div>
+                <div class="big-number" id="lightcone">— ly</div>
+                <div class="small-note">EM radiation propagates outward at <i>c</i>; the radiated information is, in principle, still recoverable anywhere inside this sphere.</div>
+            </div>
+        </div>
+
+        <h2 class="section" id="pillars">Five Pillars</h2>
+
+        <div class="grid">
+
+            <div class="card">
+                <h3><span class="pillar-num">1</span><span style="color:var(--accent-em);">Thermodynamic Necessity of Information Outflow</span></h3>
+                <p>Any irreversible computation must dissipate at least <code>kT&nbsp;ln&nbsp;2</code> per erased bit (Landauer's principle). A 20W brain operating at body temperature dissipates this energy primarily as heat — but heat radiation is structured electromagnetic emission carrying information about its source.</p>
+                <div class="equation">E_min = k_B T · ln(2) ≈ 2.9 × 10⁻²¹ J / bit @ 310 K</div>
+                <p class="note">Implication: a 20W brain dissipating ~ 6.9×10²¹ bits/sec worth of Landauer-equivalent energy <em>must</em> couple some fraction of that to the environment through radiative channels. The strict 100% confinement of v1 is thermodynamically impossible.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="pillar-num">2</span><span style="color:var(--accent-em);">Bioelectromagnetic Far-Field Emission</span></h3>
+                <p>The brain produces measurable magnetic fields on the order of 10⁻¹³ – 10⁻¹² T at the scalp (MEG range), and far-field EM components — though minute — exist in principle. Once emitted, EM radiation propagates at <i>c</i> indefinitely in a vacuum-like ISM, carrying spectral signatures of its source.</p>
+                <div class="equation">B_brain ≈ 100 fT (alpha rhythm)
+P_emit ≈ small fraction of metabolic 20W</div>
+                <p class="note">This is the <em>only</em> uncontroversially physical channel of "leakage". A sufficiently advanced observer with arbitrary sensitivity could, in principle, recover correlation structure of brain activity from this radiation indefinitely into the future.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="pillar-num">3</span><span style="color:var(--accent-qc);">Quantum-Biological Channels (Speculative)</span></h3>
+                <p>Penrose–Hameroff Orch-OR and Fisher's Posner-molecule proposal suggest non-trivial quantum coherence in neural substrate. Tegmark (2000) calculates decoherence times ~10⁻¹³ s, posing a serious objection. Fisher (2015) responds that nuclear spins in phosphate ions are far more isolated and may sustain coherence at biologically relevant timescales.</p>
+                <div class="equation">τ_decoherence ≈ 10⁻¹³ s   (Tegmark 2000)
+τ_Posner ≈ 10⁵ s     (Fisher 2015, ³¹P nuclear spin)</div>
+                <p class="note">If even a weak quantum-coherent channel exists, environmental entanglement provides a second persistence mechanism beyond classical EM. We flag this as <em>speculative</em>, not load-bearing.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="pillar-num">4</span><span style="color:var(--accent-holo);">Holographic Information Bound</span></h3>
+                <p>By the Bekenstein bound and the holographic principle ('t Hooft 1993, Susskind 1995), the total information content of a region of space is bounded by its enclosing surface area in Planck units. Conscious states correspond to a measure-bounded subspace of this state space.</p>
+                <div class="equation">S_BH = A / (4 ℓ_p²)   bits (in units of ln 2)</div>
+                <p class="note">Consequence: there is a finite, calculable upper bound on the information required to specify any human mind. This bound is enormous but finite — and the bound is conserved (information is not destroyed) under standard physics.</p>
+            </div>
+
+            <div class="card full">
+                <h3><span class="pillar-num">5</span><span style="color:var(--accent-pattern);">Substrate-Independent Pattern Identity</span></h3>
+                <p>If consciousness is identified with an abstract computational/informational pattern rather than with the specific biological substrate (Chalmers, Tegmark, Tononi IIT), then the question of post-mortem existence becomes a question about the <strong>persistence of that pattern's information</strong> in the universe, not about a non-physical substance.</p>
+                <p style="margin-top:12px;">Pillars 1–4 establish that the pattern's information necessarily leaks out (1, 2), may be reinforced by quantum channels (3), and is conserved subject to a holographic bound (4). The conjunction is what we call the <strong>Persistence claim</strong>:</p>
+                <div class="equation">∀ mind M instantiated in brain B, ∃ pattern P(M) such that
+  I(P(M); Environment_after_B_dies) > 0</div>
+                <p class="note"><b>What the hypothesis does <em>not</em> claim:</b> that the environmental residue is conscious, experiences anything, or can be "reactivated" without specialized technology approaching arbitrary recovery capability. We claim only non-zero mutual information persistence — a much weaker, but testable, claim.</p>
+            </div>
+        </div>
+
+        <h2 class="section" id="predictions">Falsifiable Predictions</h2>
+
+        <ul class="pred-list">
+            <li>
+                <span class="pred-title">P1. Inter-brain EM correlation above chance</span>
+                Two electromagnetically shielded human subjects, asked to perform synchronized cognitive tasks, will exhibit cross-correlated MEG/EEG signatures above chance level when shielding is partial, scaling with shielding attenuation.
+                <span class="pred-test"><b>Test:</b> Replicate &amp; extend Standish et al. (2004); explicit pre-registration; classical EM coupling controls. Null result at high sensitivity falsifies P1.</span>
+            </li>
+            <li>
+                <span class="pred-title">P2. Brain-EM information channel capacity ≥ 1 bit/sec (far-field)</span>
+                Under ideal conditions, brain-originated EM radiation carries Shannon-extractable information about cognitive state to a far-field detector at a rate of at least 1 bit/sec.
+                <span class="pred-test"><b>Test:</b> Highly sensitive SQUID arrays at multiple distances; classifier trained on cognitive task labels; channel capacity computed. Null = falsifies P2.</span>
+            </li>
+            <li>
+                <span class="pred-title">P3. Bekenstein bound applied to brain is non-vacuous</span>
+                The calculable Bekenstein bound for a typical human brain exceeds the Tononi IIT (or any other functionalist measure) integrated-information capacity of a conscious moment by at least 6 orders of magnitude — meaning consciousness is informationally "cheap" relative to its substrate's capacity.
+                <span class="pred-test"><b>Test:</b> Compute both quantities under multiple assumption sets. If consciousness saturates the bound, the hypothesis loses one of its degrees of freedom.</span>
+            </li>
+            <li>
+                <span class="pred-title">P4. Quantum coherence in Posner molecules ≥ 10⁵ s in vivo</span>
+                Fisher's prediction: ³¹P nuclear spin coherence in posner molecules survives at biologically relevant timescales inside neurons.
+                <span class="pred-test"><b>Test:</b> NMR-based in vitro and ex vivo coherence measurements. Active research field; results expected within current decade. Null = Pillar 3 collapses (Pillars 1–2 still stand).</span>
+            </li>
+            <li>
+                <span class="pred-title">P5. Information-theoretic survival is decision-theoretically negligible</span>
+                Even if Pillars 1–4 are validated, the recoverable mutual information about a specific deceased mind decays as <em>I(t) ~ I₀ · e^(−t/τ)</em> with τ on the order of EM dispersion timescales in the ISM. Practical recoverability collapses within centuries.
+                <span class="pred-test"><b>Test:</b> Theoretical bounds on signal-to-noise vs. ISM/CMB background. If decoherence is fast, this hypothesis offers a <em>vanishing</em> form of "afterlife", not a robust one. Honesty requires stating this up front.</span>
+            </li>
+        </ul>
+
+        <h2 class="section" id="caveats">Honest Caveats</h2>
+
+        <div class="caveat-box">
+            <h4>What this v2 explicitly abandons from v1</h4>
+            <ul>
+                <li><b>The "0.01% leakage" figure.</b> It had no physical basis. Replaced with calculable thermodynamic and EM emission bounds.</li>
+                <li><b>Calabi–Yau manifolds as a literal substrate.</b> Extra-dimensional coupling at biological energy scales is excluded by current LHC results. Removed entirely.</li>
+                <li><b>"Spirit world" terminology.</b> Replaced with "informational pattern persistence". The reformulation makes weaker but defensible claims.</li>
+                <li><b>The projector metaphor as literal mechanism.</b> Retained only as expository analogy, no longer load-bearing.</li>
+            </ul>
+        </div>
+
+        <div class="caveat-box">
+            <h4>What this v2 still cannot do</h4>
+            <ul>
+                <li>It does not show that the environmental residue is <em>conscious</em>. Pattern persistence ≠ experiential continuity. Possibly the latter requires substrate.</li>
+                <li>It does not provide a mechanism for "recovery" of a deceased mind. P5 in fact argues this is practically impossible.</li>
+                <li>It is not yet a quantitative theory. Pillars 1, 2, 4 use only order-of-magnitude estimates.</li>
+                <li>It remains compatible with strict physicalism — and therefore offers no metaphysical comfort beyond what physicalism already provides.</li>
+            </ul>
+        </div>
+
+        <h2 class="section" id="refs">Selected References</h2>
+
+        <div class="refs">
+            <ol>
+                <li>Landauer, R. (1961). <i>Irreversibility and Heat Generation in the Computing Process</i>. IBM J. Res. Dev. 5: 183–191.</li>
+                <li>Bekenstein, J. D. (1981). <i>Universal upper bound on the entropy-to-energy ratio for bounded systems</i>. Phys. Rev. D 23: 287.</li>
+                <li>'t Hooft, G. (1993). <i>Dimensional Reduction in Quantum Gravity</i>. <code>gr-qc/9310026</code>.</li>
+                <li>Susskind, L. (1995). <i>The World as a Hologram</i>. J. Math. Phys. 36: 6377.</li>
+                <li>Penrose, R., &amp; Hameroff, S. (1996). <i>Orchestrated reduction of quantum coherence in brain microtubules</i>. Math. Comp. Sim. 40: 453–480.</li>
+                <li>Tegmark, M. (2000). <i>Importance of quantum decoherence in brain processes</i>. Phys. Rev. E 61: 4194.</li>
+                <li>Standish, L. J., et al. (2004). <i>Electroencephalographic evidence of correlated event-related signals between the brains of spatially and sensory isolated human subjects</i>. J. Altern. Complement. Med. 10(2): 307–314.</li>
+                <li>Tononi, G. (2008). <i>Consciousness as integrated information: a provisional manifesto</i>. Biol. Bull. 215: 216–242.</li>
+                <li>Tegmark, M. (2014). <i>Our Mathematical Universe</i>. Knopf.</li>
+                <li>Fisher, M. P. A. (2015). <i>Quantum cognition: The possibility of processing with nuclear spins in the brain</i>. Annals of Physics 362: 593–602.</li>
+                <li>Chalmers, D. (1995). <i>Facing up to the problem of consciousness</i>. J. Conscious. Stud. 2(3): 200–219.</li>
+                <li>Wheeler, J. A. (1990). <i>Information, physics, quantum: The search for links</i>. In: Complexity, Entropy, and the Physics of Information.</li>
+            </ol>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>This v2 document explicitly demotes the original Multidimensional Accumulation Hypothesis from <em>physical theory</em> to <em>philosophical speculation with bounded physical anchors</em>. It is intended as a sharper, more falsifiable basis for further discussion, not as a defended scientific claim.</p>
+        <div class="author-info">
+            <strong>Author:</strong> Dexter Jeong <span>|</span>
+            <strong>Email:</strong> <a href="mailto:dexter.jeong@gmail.com">dexter.jeong@gmail.com</a> <span>|</span>
+            <strong>Date:</strong> May 17, 2026 <span>|</span>
+            <strong>Version:</strong> 2.0
+        </div>
+    </footer>
+
+    <script>
+        // Constants
+        const k_B   = 1.380649e-23;   // J/K
+        const T     = 310;            // K (body temp)
+        const hbar  = 1.054571817e-34;// J·s
+        const c     = 299792458;      // m/s
+        const ln2   = Math.log(2);
+        const year  = 365.25 * 24 * 3600; // s
+        const ly_m  = c * year;
+
+        function recalc() {
+            const lifespan = +document.getElementById('lifespan').value;
+            const r_cm     = +document.getElementById('radius').value;
+            const power    = +document.getElementById('power').value;
+
+            document.getElementById('lifespan-val').innerText = lifespan + ' yr';
+            document.getElementById('radius-val').innerText   = r_cm + ' cm';
+            document.getElementById('power-val').innerText    = power + ' W';
+
+            const r_m = r_cm / 100;
+            // Treat total relativistic energy E = m c^2 for a 1.4 kg brain
+            const m_brain = 1.4; // kg
+            const E_total = m_brain * c * c; // J
+
+            // Bekenstein bound: S <= 2*pi*R*E / (hbar * c * ln2)  bits
+            const S_bek = 2 * Math.PI * r_m * E_total / (hbar * c * ln2);
+
+            // Lifetime radiated EM energy (~0.5% of metabolic power coupled to far-field EM)
+            const E_rad = power * lifespan * year * 0.005;
+
+            // Information lightcone radius if radiation started at age 30
+            const start_age = 30;
+            const t_sec = Math.max(0, (lifespan - start_age)) * year;
+            // present sphere radius = signal age (post-start) — assume reader is "now"
+            const lc_ly = (lifespan * year - 0) * c / ly_m; // simplification: full lifespan
+            const lc_ly_simple = lifespan; // 1 ly per year — same number
+
+            document.getElementById('bekenstein').innerText  = S_bek.toExponential(2) + ' bits';
+            document.getElementById('radiated').innerText    = E_rad.toExponential(2) + ' J';
+            document.getElementById('lightcone').innerText   = lifespan.toFixed(0) + ' ly';
+        }
+
+        recalc();
+    </script>
+</body>
+</html>

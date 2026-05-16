@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기질 독립 패턴 지속 가설 (v2)</title>
+    <style>
+        :root {
+            --bg-color: #0a0b10;
+            --text-color: #e2e8f0;
+            --accent-em: #00f2fe;
+            --accent-qc: #9b51e0;
+            --accent-holo: #ffb703;
+            --accent-pattern: #00ff87;
+            --accent-rigor: #ff4d8d;
+            --card-bg: #161923;
+            --muted: #8a93a6;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', 'Malgun Gothic', Tahoma, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.75;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #1f1c2c, #4b3f72);
+            padding: 50px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        header .version-tag {
+            display: inline-block;
+            background: rgba(255,77,141,0.15);
+            border: 1px solid var(--accent-rigor);
+            color: var(--accent-rigor);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2.1rem;
+            letter-spacing: -1px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        header p.subtitle {
+            margin: 10px 0 0 0;
+            font-size: 1rem;
+            color: #ccc;
+        }
+
+        header p.lineage {
+            margin: 18px auto 0 auto;
+            max-width: 700px;
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-style: italic;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .intro-quote {
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 4px solid var(--accent-pattern);
+            padding: 22px;
+            font-size: 1.05rem;
+            margin-bottom: 30px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .intro-quote strong {
+            color: var(--accent-pattern);
+        }
+
+        .meta-block {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 40px;
+            font-size: 0.8rem;
+        }
+
+        .meta-block span {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: var(--muted);
+        }
+
+        .meta-block span b {
+            color: var(--text-color);
+        }
+
+        h2.section {
+            font-size: 1.4rem;
+            margin-top: 50px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 8px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 25px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,242,254,0.08);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card .pillar-num {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+            text-align: center;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .card.full {
+            grid-column: 1 / -1;
+        }
+
+        .card .equation {
+            background: #020205;
+            border: 1px dashed rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin: 14px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: var(--accent-em);
+            overflow-x: auto;
+        }
+
+        .card .note {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 10px;
+            border-top: 1px dashed rgba(255,255,255,0.06);
+            padding-top: 8px;
+        }
+
+        .calc-box {
+            background-color: #020205;
+            border: 2px solid #222;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .calc-box h3 {
+            margin-top: 0;
+            color: var(--accent-em);
+        }
+
+        .calc-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            margin: 18px 0;
+        }
+
+        .calc-row label {
+            min-width: 180px;
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+
+        .calc-row input[type="range"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .calc-row .value {
+            min-width: 120px;
+            text-align: right;
+            font-family: 'Courier New', monospace;
+            color: var(--accent-em);
+        }
+
+        .calc-output {
+            margin-top: 25px;
+            padding: 20px;
+            background: rgba(0,255,135,0.05);
+            border-left: 3px solid var(--accent-pattern);
+            border-radius: 0 8px 8px 0;
+        }
+
+        .calc-output .big-number {
+            font-size: 1.8rem;
+            color: var(--accent-pattern);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+
+        .calc-output .small-note {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-top: 8px;
+        }
+
+        .pred-list {
+            counter-reset: pred;
+            list-style: none;
+            padding: 0;
+        }
+
+        .pred-list li {
+            counter-increment: pred;
+            background: var(--card-bg);
+            border-left: 3px solid var(--accent-rigor);
+            padding: 18px 22px;
+            margin-bottom: 14px;
+            border-radius: 0 8px 8px 0;
+            position: relative;
+        }
+
+        .pred-list li::before {
+            content: "P" counter(pred);
+            position: absolute;
+            top: 18px;
+            right: 22px;
+            color: var(--accent-rigor);
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .pred-list li .pred-title {
+            font-weight: bold;
+            color: var(--accent-rigor);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .pred-list li .pred-test {
+            font-size: 0.88rem;
+            color: var(--muted);
+            margin-top: 8px;
+            display: block;
+        }
+
+        .refs {
+            font-size: 0.88rem;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        .refs ol {
+            padding-left: 22px;
+        }
+
+        .refs ol li {
+            margin-bottom: 8px;
+        }
+
+        .refs code {
+            color: var(--accent-em);
+            background: rgba(0,242,254,0.05);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+
+        .caveat-box {
+            background: rgba(255,77,141,0.05);
+            border: 1px solid rgba(255,77,141,0.2);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 30px 0;
+            font-size: 0.95rem;
+        }
+
+        .caveat-box h4 {
+            margin-top: 0;
+            color: var(--accent-rigor);
+            font-size: 1rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 0.9rem;
+            border-top: 1px solid #222;
+        }
+
+        .author-info {
+            margin-top: 15px;
+            font-size: 0.88rem;
+            color: #888;
+            border-top: 1px dashed #333;
+            padding-top: 15px;
+            display: inline-block;
+        }
+        .author-info span {
+            margin: 0 10px;
+        }
+        .author-info a {
+            color: var(--accent-em);
+            text-decoration: none;
+        }
+        .author-info a:hover {
+            text-decoration: underline;
+        }
+
+        .toc {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 8px;
+            padding: 15px 22px;
+            margin-bottom: 40px;
+            font-size: 0.92rem;
+        }
+
+        .toc strong {
+            color: var(--accent-em);
+        }
+
+        .toc a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin-right: 14px;
+            opacity: 0.85;
+        }
+
+        .toc a:hover {
+            color: var(--accent-em);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <span class="version-tag">VERSION 2 — 학술 재정식화</span>
+        <h1>기질 독립 패턴 지속 가설</h1>
+        <p class="subtitle">「다차원 누적 가설」의 검증 가능한 재정식화</p>
+        <p class="lineage">v1(2026년 5월)의 후속 문서. v1의 신비주의적 프레이밍을 정보이론·생체전자기학·홀로그래픽 원리에 기반한 정량적 골격으로 교체하였으며, 각 주장은 측정 가능한 예측 또는 형식적 상한과 연결된다.</p>
+    </header>
+
+    <div class="container">
+
+        <div class="toc">
+            <strong>목차:</strong>
+            <a href="#thesis">테제</a>
+            <a href="#calc">정보량 계산기</a>
+            <a href="#pillars">다섯 기둥</a>
+            <a href="#predictions">검증 가능 예측</a>
+            <a href="#caveats">한계</a>
+            <a href="#refs">참고문헌</a>
+        </div>
+
+        <div class="meta-block">
+            <span><b>분야:</b> 물리철학 / 의식 연구</span>
+            <span><b>검증 가능성:</b> 부분적 (P1–P4 실험 가능)</span>
+            <span><b>상태:</b> 사변적 가설, 경험적 입증 없음</span>
+            <span><b>수학 수준:</b> 차수(order-of-magnitude) 추정</span>
+        </div>
+
+        <h2 class="section" id="thesis">테제</h2>
+
+        <div class="intro-quote">
+            <p>의식 활동은 생물학적 뇌에서 실행되는 <strong>물리적 패턴</strong>이다. 모든 연산 행위는 열역학적·전자기적·(가능하다면) 양자 결맞음적 부산물을 생성하며, 이 부산물은 환경에 흔적을 남긴다. 이 흔적의 정보량은 Bekenstein 류의 엔트로피 상한에 의해 유한하게 제한되고, 유한한 속도로 전파되며, 생물학적 죽음과 함께 소멸하지 않는다 — 이 흔적은 분산된 정보 구조로서 주변 물리 우주에 계속 존재한다.</p>
+            <p style="margin-top:14px;">우리는 이 분산 잔류물이 <em>경험을 계속하는 주체</em>를 구성한다고 주장하지 않는다. 다만 <strong>한 마음을 명세하기에 충분한 정보 패턴</strong>이, 뇌가 그것을 실행하기를 멈춘 뒤에도 자명하지 않은 물리적 지속성을 가진다고 주장한다. 그리고 이 주장을 정량화하고 검증하려 한다.</p>
+        </div>
+
+        <h2 class="section" id="calc">차수 추정 계산기</h2>
+
+        <div class="calc-box">
+            <h3>생체전자기 정보 유출량</h3>
+            <p style="font-size:0.95rem; color:var(--muted);">의식하는 뇌를 전자기 광원으로 간주하고, Bekenstein 상한에 의해 제한되는 일생 동안의 정보 방출량 상한을 추정한다.</p>
+
+            <div class="calc-row">
+                <label>수명 (년):</label>
+                <input type="range" id="lifespan" min="1" max="120" value="70" oninput="recalc()">
+                <span class="value" id="lifespan-val">70 년</span>
+            </div>
+
+            <div class="calc-row">
+                <label>뇌 반경 (cm):</label>
+                <input type="range" id="radius" min="5" max="15" value="8" oninput="recalc()">
+                <span class="value" id="radius-val">8 cm</span>
+            </div>
+
+            <div class="calc-row">
+                <label>뇌 대사 출력 (W):</label>
+                <input type="range" id="power" min="5" max="40" value="20" oninput="recalc()">
+                <span class="value" id="power-val">20 W</span>
+            </div>
+
+            <div class="calc-output">
+                <div>뇌 부피에 대한 Bekenstein 정보 상한:</div>
+                <div class="big-number" id="bekenstein">— bits</div>
+                <div class="small-note">주어진 반경·총에너지 영역의 정보량 상한: <code>S ≤ 2πRE / (ℏc ln 2)</code></div>
+
+                <div style="margin-top:18px;">일생 동안 방출된 EM 에너지 (~20W 뇌, 약 0.5% 원거리장 결합 가정):</div>
+                <div class="big-number" id="radiated">— J</div>
+                <div class="small-note">대사 에너지 대부분은 적외선 열복사로 빠져나가지만, 그 열복사 또한 광원의 정보를 담고 있다.</div>
+
+                <div style="margin-top:18px;">현재 시점까지의 <em>정보 광원뿔(lightcone)</em> 반경:</div>
+                <div class="big-number" id="lightcone">— 광년</div>
+                <div class="small-note">EM 복사는 빛의 속도로 전파되므로, 방출된 정보는 원리적으로 이 구 내부 어디에서나 복원 가능하다.</div>
+            </div>
+        </div>
+
+        <h2 class="section" id="pillars">다섯 기둥</h2>
+
+        <div class="grid">
+
+            <div class="card">
+                <h3><span class="pillar-num">1</span><span style="color:var(--accent-em);">정보 유출의 열역학적 필연성</span></h3>
+                <p>모든 비가역 연산은 지워지는 비트당 최소 <code>kT&nbsp;ln&nbsp;2</code>의 에너지를 소산해야 한다 (Landauer 원리). 체온에서 작동하는 20W 뇌는 이 에너지를 주로 열로 방출하지만 — 열복사 또한 광원에 대한 정보를 담은 구조화된 전자기 방출이다.</p>
+                <div class="equation">E_min = k_B T · ln(2) ≈ 2.9 × 10⁻²¹ J / bit @ 310 K</div>
+                <p class="note">함의: 초당 약 6.9×10²¹ 비트 상당의 Landauer 에너지를 소산하는 뇌는, 그 일부를 환경으로 방출하지 <em>않을 수 없다</em>. v1의 "100% 차원 종속" 주장은 열역학적으로 불가능하다.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="pillar-num">2</span><span style="color:var(--accent-em);">생체전자기 원거리장 방출</span></h3>
+                <p>뇌는 두피 표면에서 10⁻¹³ – 10⁻¹² T 수준의 자기장(MEG 측정 가능)을 생성하며, 원거리장 EM 성분은 미약하지만 원리적으로 존재한다. 일단 방출된 EM 복사는 진공에 가까운 성간 매질에서 광속으로 무한히 전파되며 광원의 스펙트럼 특성을 운반한다.</p>
+                <div class="equation">B_뇌 ≈ 100 fT (알파파)
+P_방출 ≈ 대사 20W의 미세 일부</div>
+                <p class="note">이것은 "누수"의 <em>유일하게 비논쟁적인 물리 채널</em>이다. 충분히 민감한 가상의 관측자는 원리적으로 이 복사에서 뇌 활동의 상관 구조를 무한한 미래까지 복원할 수 있다.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="pillar-num">3</span><span style="color:var(--accent-qc);">양자생물학 채널 (사변적)</span></h3>
+                <p>Penrose–Hameroff의 Orch-OR와 Fisher의 Posner 분자 가설은 신경 기질에서 비자명한 양자 결맞음을 시사한다. Tegmark(2000)는 결잃음 시간을 ~10⁻¹³ 초로 계산하며 강력한 반론을 제기했다. Fisher(2015)는 인산이온의 핵스핀이 훨씬 잘 격리되어 생물학적 시간 척도까지 결맞음을 유지할 수 있다고 응답한다.</p>
+                <div class="equation">τ_결잃음 ≈ 10⁻¹³ s   (Tegmark 2000)
+τ_Posner ≈ 10⁵ s     (Fisher 2015, ³¹P 핵스핀)</div>
+                <p class="note">약한 양자 결맞음 채널이라도 존재한다면, 환경 얽힘은 고전 EM 외의 두 번째 지속 메커니즘이 된다. 이 기둥은 <em>사변적</em>이며 핵심 논증을 지탱하지 않는다.</p>
+            </div>
+
+            <div class="card">
+                <h3><span class="pillar-num">4</span><span style="color:var(--accent-holo);">홀로그래픽 정보 상한</span></h3>
+                <p>Bekenstein 상한과 홀로그래픽 원리('t Hooft 1993, Susskind 1995)에 따라, 공간 영역의 총 정보량은 그것을 둘러싼 표면적(Planck 단위)에 의해 제한된다. 의식 상태는 이 상태 공간의 측도-유계 부분공간에 대응한다.</p>
+                <div class="equation">S_BH = A / (4 ℓ_p²)   bits (ln 2 단위)</div>
+                <p class="note">결론: 임의의 인간 마음을 명세하는 데 필요한 정보량에는 유한한 상한이 존재한다. 이 상한은 거대하지만 유한하며, 표준 물리학 하에서 보존된다 (정보는 파괴되지 않는다).</p>
+            </div>
+
+            <div class="card full">
+                <h3><span class="pillar-num">5</span><span style="color:var(--accent-pattern);">기질 독립 패턴 동일성</span></h3>
+                <p>의식이 특정 생물학적 기질이 아닌 추상적 연산·정보 패턴과 동일시된다면 (Chalmers의 기능주의, Tegmark, Tononi IIT), 사후 존재의 문제는 비물리적 실체에 관한 문제가 아니라 <strong>그 패턴의 정보가 우주에 얼마나 지속되는가</strong>에 관한 문제로 환원된다.</p>
+                <p style="margin-top:12px;">기둥 1–4는 패턴 정보가 (1, 2) 필연적으로 유출되고, (3) 양자 채널로 보강될 수 있으며, (4) 홀로그래픽 상한 하에서 보존됨을 확립한다. 이들의 결합이 <strong>지속 명제(Persistence claim)</strong>이다:</p>
+                <div class="equation">뇌 B에 실행된 임의의 마음 M에 대하여, 어떤 패턴 P(M)이 존재하여
+  I(P(M); B 사후의 환경) > 0</div>
+                <p class="note"><b>이 가설이 주장하지 <em>않는</em> 것:</b> 환경 잔류물이 의식적이라거나, 무언가를 경험한다거나, 임의의 회복 능력을 갖춘 가상 기술 없이 "재활성화"될 수 있다는 것. 우리는 단지 비영(非零) 상호정보 지속성만을 주장한다 — 훨씬 약하지만 검증 가능한 주장.</p>
+            </div>
+        </div>
+
+        <h2 class="section" id="predictions">검증 가능 예측</h2>
+
+        <ul class="pred-list">
+            <li>
+                <span class="pred-title">P1. 우연 수준 이상의 뇌-뇌 EM 상관</span>
+                전자기 차폐된 두 인간 피험자가 동기화된 인지 과제를 수행할 때, 부분 차폐 조건에서 우연 수준을 넘는 MEG/EEG 교차상관이 관측되며, 그 강도는 차폐 감쇠에 비례하여 변화한다.
+                <span class="pred-test"><b>실험:</b> Standish et al.(2004) 복제 및 확장. 사전 등록 필수, 고전 EM 결합 통제. 고감도에서 영가설 = P1 기각.</span>
+            </li>
+            <li>
+                <span class="pred-title">P2. 뇌-EM 정보 채널 용량 ≥ 1 bit/s (원거리장)</span>
+                이상 조건에서, 뇌가 발원한 EM 복사는 원거리장 검출기에 인지 상태에 관한 Shannon-추출 가능 정보를 최소 초당 1비트의 비율로 운반한다.
+                <span class="pred-test"><b>실험:</b> 다중 거리에서의 고감도 SQUID 어레이, 인지 과제 라벨로 분류기 학습, 채널 용량 산출. 영가설 = P2 기각.</span>
+            </li>
+            <li>
+                <span class="pred-title">P3. 뇌에 적용된 Bekenstein 상한의 비공허성</span>
+                전형적인 인간 뇌에 대한 Bekenstein 상한은, 한 의식 순간에 대한 Tononi IIT(또는 기타 기능주의적 측도) 통합 정보 용량보다 적어도 6자릿수 이상 크다 — 즉 의식은 그 기질의 용량 대비 정보적으로 "저렴하다".
+                <span class="pred-test"><b>실험:</b> 여러 가정 하에 두 양을 산출. 의식이 상한을 포화시킨다면 가설의 자유도 하나가 사라진다.</span>
+            </li>
+            <li>
+                <span class="pred-title">P4. Posner 분자 양자 결맞음 ≥ 10⁵ s in vivo</span>
+                Fisher의 예측: posner 분자 내 ³¹P 핵스핀 결맞음이 뉴런 안에서 생물학적 시간 척도까지 유지된다.
+                <span class="pred-test"><b>실험:</b> NMR 기반 in vitro/ex vivo 결맞음 측정. 활발한 현역 연구 분야. 영가설 = 기둥 3 붕괴 (기둥 1·2는 유지).</span>
+            </li>
+            <li>
+                <span class="pred-title">P5. 정보이론적 사후 존재의 의사결정적 무시 가능성</span>
+                기둥 1–4가 모두 검증되더라도, 특정 사망자에 관한 복원 가능 상호정보는 <em>I(t) ~ I₀ · e^(−t/τ)</em> 형태로 감쇠하며, τ는 성간 매질에서의 EM 분산 시간 척도 수준이다. 실용적 복원 가능성은 수 세기 내에 사라진다.
+                <span class="pred-test"><b>실험:</b> ISM/CMB 배경에 대한 신호 대 잡음 비의 이론적 상한. 빠른 감쇠가 입증되면 본 가설은 <em>소멸하는</em> 형태의 "사후"만을 제시하는 것이며, 이를 정직하게 명시해야 한다.</span>
+            </li>
+        </ul>
+
+        <h2 class="section" id="caveats">정직한 한계</h2>
+
+        <div class="caveat-box">
+            <h4>v2가 v1에서 명시적으로 포기한 것</h4>
+            <ul>
+                <li><b>"0.01% 누수율".</b> 물리적 근거 없음. 계산 가능한 열역학·EM 방출 상한으로 대체.</li>
+                <li><b>문자 그대로의 칼라비-야우 다양체.</b> 생물학적 에너지 척도에서의 여분차원 결합은 현재 LHC 결과로 배제됨. 전면 삭제.</li>
+                <li><b>"영의 세계" 용어.</b> "정보 패턴 지속"으로 대체. 더 약하지만 방어 가능한 주장으로 재정식화.</li>
+                <li><b>프로젝터 비유의 문자 그대로의 메커니즘 해석.</b> 설명적 유추로만 남기고 논증을 지탱하지 않음.</li>
+            </ul>
+        </div>
+
+        <div class="caveat-box">
+            <h4>v2도 여전히 할 수 없는 것</h4>
+            <ul>
+                <li>환경 잔류물이 <em>의식적</em>임을 보이지 못한다. 패턴 지속 ≠ 경험의 연속성. 후자는 기질을 요구할 가능성 있음.</li>
+                <li>사망자 마음의 "복원" 메커니즘을 제공하지 못한다. P5는 오히려 그것이 실용적으로 불가능함을 논한다.</li>
+                <li>아직 정량 이론이 아니다. 기둥 1, 2, 4는 차수 추정만 사용한다.</li>
+                <li>엄격한 물리주의와 호환된다 — 따라서 물리주의가 이미 제공하는 것 이상의 형이상학적 위안을 제공하지 않는다.</li>
+            </ul>
+        </div>
+
+        <h2 class="section" id="refs">선별 참고문헌</h2>
+
+        <div class="refs">
+            <ol>
+                <li>Landauer, R. (1961). <i>Irreversibility and Heat Generation in the Computing Process</i>. IBM J. Res. Dev. 5: 183–191.</li>
+                <li>Bekenstein, J. D. (1981). <i>Universal upper bound on the entropy-to-energy ratio for bounded systems</i>. Phys. Rev. D 23: 287.</li>
+                <li>'t Hooft, G. (1993). <i>Dimensional Reduction in Quantum Gravity</i>. <code>gr-qc/9310026</code>.</li>
+                <li>Susskind, L. (1995). <i>The World as a Hologram</i>. J. Math. Phys. 36: 6377.</li>
+                <li>Penrose, R., &amp; Hameroff, S. (1996). <i>Orchestrated reduction of quantum coherence in brain microtubules</i>. Math. Comp. Sim. 40: 453–480.</li>
+                <li>Tegmark, M. (2000). <i>Importance of quantum decoherence in brain processes</i>. Phys. Rev. E 61: 4194.</li>
+                <li>Standish, L. J., et al. (2004). <i>Electroencephalographic evidence of correlated event-related signals between the brains of spatially and sensory isolated human subjects</i>. J. Altern. Complement. Med. 10(2): 307–314.</li>
+                <li>Tononi, G. (2008). <i>Consciousness as integrated information: a provisional manifesto</i>. Biol. Bull. 215: 216–242.</li>
+                <li>Tegmark, M. (2014). <i>Our Mathematical Universe</i>. Knopf.</li>
+                <li>Fisher, M. P. A. (2015). <i>Quantum cognition: The possibility of processing with nuclear spins in the brain</i>. Annals of Physics 362: 593–602.</li>
+                <li>Chalmers, D. (1995). <i>Facing up to the problem of consciousness</i>. J. Conscious. Stud. 2(3): 200–219.</li>
+                <li>Wheeler, J. A. (1990). <i>Information, physics, quantum: The search for links</i>. In: Complexity, Entropy, and the Physics of Information.</li>
+            </ol>
+        </div>
+
+    </div>
+
+    <footer>
+        <p>본 v2 문서는 원래의 「다차원 누적 가설」을 <em>물리 이론</em>에서 <em>물리적 정박점을 가진 철학적 사변</em>으로 명시적으로 격하한다. 이는 추가 토론을 위한 더 날카롭고 검증 가능한 기반으로 의도된 것이지, 옹호되는 과학적 주장이 아니다.</p>
+        <div class="author-info">
+            <strong>작성자:</strong> 정원석 (Dexter Jeong) <span>|</span>
+            <strong>이메일:</strong> <a href="mailto:dexter.jeong@gmail.com">dexter.jeong@gmail.com</a> <span>|</span>
+            <strong>작성일:</strong> 2026년 5월 17일 <span>|</span>
+            <strong>버전:</strong> 2.0
+        </div>
+    </footer>
+
+    <script>
+        const k_B   = 1.380649e-23;
+        const T     = 310;
+        const hbar  = 1.054571817e-34;
+        const c     = 299792458;
+        const ln2   = Math.log(2);
+        const year  = 365.25 * 24 * 3600;
+        const ly_m  = c * year;
+
+        function recalc() {
+            const lifespan = +document.getElementById('lifespan').value;
+            const r_cm     = +document.getElementById('radius').value;
+            const power    = +document.getElementById('power').value;
+
+            document.getElementById('lifespan-val').innerText = lifespan + ' 년';
+            document.getElementById('radius-val').innerText   = r_cm + ' cm';
+            document.getElementById('power-val').innerText    = power + ' W';
+
+            const r_m = r_cm / 100;
+            const m_brain = 1.4;
+            const E_total = m_brain * c * c;
+
+            const S_bek = 2 * Math.PI * r_m * E_total / (hbar * c * ln2);
+            const E_rad = power * lifespan * year * 0.005;
+
+            document.getElementById('bekenstein').innerText  = S_bek.toExponential(2) + ' bits';
+            document.getElementById('radiated').innerText    = E_rad.toExponential(2) + ' J';
+            document.getElementById('lightcone').innerText   = lifespan.toFixed(0) + ' 광년';
+        }
+
+        recalc();
+    </script>
+</body>
+</html>
